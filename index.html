@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Torres de Hanoi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="moveCounterPanel" class="move-counter">
+    Movimientos: <span id="moveCount">0</span>
+  </div>
+
+  <main class="container">
+    <h1>Torres de Hanoi</h1>
+
+    <section class="controls">
+      <label>
+        Cantidad de discos:
+        <input id="numDiscos" type="number" min="3" max="10" value="4" />
+      </label>
+
+      <div id="colorControls" class="color-controls">
+      </div>
+
+      <div class="buttons-row">
+        <button id="generarBtn">Generar torre</button>
+        <button id="randomColorsBtn">Colores aleatorios</button>
+      </div>
+
+      <hr/ >
+
+      <div class="autoplay-controls">
+        <label>
+          Velocidad (ms por movimiento):
+          <input id="speedRange" type="range" min="100" max="1500" value="500" />
+          <span id="speedValue">500</span> ms
+        </label>
+        <div class="buttons-row">
+          <button id="solveBtn">Resolver automáticamente</button>
+          <button id="pauseBtn" disabled>Pausar</button>
+          <button id="resumeBtn" disabled>Reanudar</button>
+          <button id="resetBtn">Reiniciar</button>
+        </div>
+      </div>
+
+      <p class="help">
+        Modo manual: haz clic en una pila para seleccionar el disco superior (se marca) y luego en la pila de destino para moverlo. 
+        No se permiten movimientos ilegales (disco mayor sobre menor).
+      </p>
+
+      <p id="mensaje" class="mensaje"></p>
+    </section>
+
+    <section id="tablero" class="board">
+      <div class="peg" data-peg="0">
+        <div class="peg-label">Pila A</div>
+        <div class="stack" id="stack0"></div>
+      </div>
+      <div class="peg" data-peg="1">
+        <div class="peg-label">Pila B</div>
+        <div class="stack" id="stack1"></div>
+      </div>
+      <div class="peg" data-peg="2">
+        <div class="peg-label">Pila C</div>
+        <div class="stack" id="stack2"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalVictoria" class="modal-overlay">
+    <div class="modal-content">
+      <h2>¡Felicidades!</h2>
+      <p>Juego terminado.</p>
+      <button id="modalAceptarBtn">Aceptar</button>
+    </div>
+  </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
