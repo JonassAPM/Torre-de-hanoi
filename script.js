@@ -325,7 +325,7 @@ function clearAutoplay() {
 }
 
 function comprobarVictoria() {
-  if (pilas[2].length === numDiscos && !modalVictoriaEl.classList.contains('visible')) {
+  if ((pilas[1].length === numDiscos || pilas[2].length === numDiscos) && !modalVictoriaEl.classList.contains('visible')) {
     clearAutoplay();
     modalVictoriaEl.classList.add('visible');
   }
@@ -344,12 +344,20 @@ function updateSliderFill() {
 generarBtn.addEventListener('click', () => {
   const val = parseInt(numDiscosInput.value, 10);
   if (isNaN(val) || val < 3 || val > 10) {
-    mensajeEl.textContent = 'Ingresa un número de discos entre 3 y 10.';
+    mensajeEl.textContent = '*Ingresa un número de discos entre 3 y 10.*';
     return;
   }
   numDiscos = val;
   crearControlesColor(numDiscos);
   inicializarPilas();
+});
+
+numDiscosInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+
+    e.preventDefault(); 
+    generarBtn.click(); 
+  }
 });
 
 randomColorsBtn.addEventListener('click', () => {

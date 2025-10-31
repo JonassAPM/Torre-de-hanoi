@@ -183,7 +183,7 @@ button:disabled{opacity:1; cursor:not-allowed}
 .mensaje{
   margin-top:8px;
   font-size:14px;
-  color:var(--accent);
+  color: rgb(0, 81, 255);
 }
 
 .credits{
