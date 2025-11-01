@@ -7,14 +7,22 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="moveCounterPanel" class="move-counter">
-    Movimientos: <span id="moveCount">0</span>
-  </div>
 
   <main class="container">
     <h1>Torres de Hanoi</h1>
 
     <section class="controls">
+      <div class="counters-wrapper">
+        <div id="minMoveCounterPanel" class="move-counter-min">
+          Movimientos Mínimos: <span id="minMoveCount">0</span>
+        </div>
+        <div id="moveCounterPanel" class="move-counter">
+          Movimientos Realizados: <span id="moveCount">0</span>
+        </div>
+        <div id="timerPanel" class="timer">
+          Tiempo: <span id="timer">00:00</span>
+        </div>
+      </div>
       <label>
         Cantidad de discos:
         <input id="numDiscos" type="number" min="3" max="10" value="4" />
@@ -72,6 +80,14 @@
     <div class="modal-content">
       <h2>¡Felicidades!</h2>
       <p>Juego terminado.</p>
+
+      <p class="modal-stat">
+        Movimientos: <span id="modalMoveCount">0</span>
+      </p>
+      <p class="modal-stat">
+        Tiempo: <span id="modalTime">00:00</span>
+      </p>
+
       <button id="modalAceptarBtn">Aceptar</button>
     </div>
   </div>

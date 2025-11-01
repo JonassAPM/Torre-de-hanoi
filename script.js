@@ -75,8 +75,12 @@ const speedValue = document.getElementById('speedValue');
 const boardEl = document.getElementById('tablero'); ;
 const mensajeEl = document.getElementById('mensaje');
 const moveCountEl = document.getElementById('moveCount');
+const minMoveCountEl = document.getElementById('minMoveCount');
+const timerEl = document.getElementById('timer');
 const modalVictoriaEl = document.getElementById('modalVictoria');
 const modalAceptarBtn = document.getElementById('modalAceptarBtn');
+const modalMoveCountEl = document.getElementById('modalMoveCount');
+const modalTimeEl = document.getElementById('modalTime');
 
 let numDiscos = parseInt(numDiscosInput.value, 10) || 3;
 
@@ -91,6 +95,11 @@ let autoplayPaused = false;
 
 let moveCount = 0;
 let isGameWon = false;
+
+let timerInterval = null;
+let secondsElapsed = 0;
+let isTimerRunning = false;
+let isTimerDisabled = false;
 
 function crearControlesColor(n) {
   colorControls.innerHTML = '';
@@ -123,6 +132,39 @@ function crearControlesColor(n) {
     wrapper.appendChild(input);
     colorControls.appendChild(wrapper);
   }
+}
+
+function updateTimerDisplay() {
+  if (isTimerDisabled) {
+    timerEl.textContent = "--:--";
+    return;
+  }
+  const minutes = Math.floor(secondsElapsed / 60);
+  const seconds = secondsElapsed % 60;
+  timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+  if (isTimerRunning || isTimerDisabled) return;
+  isTimerRunning = true;
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  isTimerRunning = false;
+}
+
+function resetTimer() {
+  stopTimer();
+  secondsElapsed = 0;
+  isTimerRunning = false;
+  isTimerDisabled = false;
+  updateTimerDisplay();
 }
 
 function hslToHex(h, s, l) {
@@ -179,7 +221,11 @@ function inicializarPilas() {
 
   moveCount = 0;
   moveCountEl.textContent = moveCount;
+  const minMoves = Math.pow(2, numDiscos) - 1;
+  minMoveCountEl.textContent = minMoves;
   isGameWon = false;
+
+  resetTimer();
 
   if (boardEl) {
     boardEl.style.height = 'auto'; 
@@ -243,17 +289,23 @@ function renderPilas() {
 }
 
 function intentarMover(fromIndex, toIndex, isUserMove = false) {
-  if (isUserMove && (autoplayTimer !== null || autoplayPaused)) {
-    if (autoplayTimer !== null) {
+  if (isUserMove) {
+    // Si el usuario mueve, el juego es "legal" de nuevo
+    isTimerDisabled = false;
+    
+    if (isUserMove && (autoplayTimer !== null || autoplayPaused)) {
+      if (autoplayTimer !== null) {
         clearTimeout(autoplayTimer);
         autoplayTimer = null; 
-    }
+      }
     autoplayPaused = true;
     moves = [];
     autoplayIndex = 0;
 
     updateControlButtons(); 
+    }
   }
+
   if (pilas[fromIndex].isEmpty()) { 
     return false;
   }
@@ -262,6 +314,10 @@ function intentarMover(fromIndex, toIndex, isUserMove = false) {
 
   if (destTop !== undefined && destTop < disco) {
     return false;
+  }
+
+  if (isUserMove && !isTimerRunning && secondsElapsed === 0 && !isTimerDisabled) {
+      startTimer();
   }
 
   pilas[fromIndex].pop();
@@ -385,12 +441,14 @@ function pausarAutoplay() {
     clearTimeout(autoplayTimer);
   }
   autoplayPaused = true;
+  stopTimer();
   updateControlButtons();
 }
 
 function reanudarAutoplay() {
   if (!autoplayPaused) return;
   autoplayPaused = false;
+  startTimer();
   updateControlButtons();
   runAutoplayStep();
 }
@@ -410,6 +468,18 @@ function comprobarVictoria() {
   if (!isGameWon && (pilas[1].getLength() === numDiscos || pilas[2].getLength() === numDiscos)) {
     isGameWon = true;
     clearAutoplay();
+    stopTimer();
+
+    modalMoveCountEl.textContent = moveCount;
+
+    if (isTimerDisabled) {
+      modalTimeEl.textContent = "--:-- (Solución Auto.)";
+    } else {
+      const minutes = Math.floor(secondsElapsed / 60);
+      const seconds = secondsElapsed % 60;
+      modalTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
     modalVictoriaEl.classList.add('visible');
   }
 }
@@ -479,6 +549,10 @@ randomColorsBtn.addEventListener('click', () => {
 solveBtn.addEventListener('click', () => {
     pausarAutoplay(); 
     
+    stopTimer();
+    isTimerDisabled = true;
+    updateTimerDisplay();
+
     movesQueue = [];
     let numDiscos = parseInt(document.getElementById('numDiscos').value);
     let targetPeg = 2;
@@ -499,6 +573,10 @@ pauseBtn.addEventListener('click', () => {
 
 resumeBtn.addEventListener('click', () => {
     pausarAutoplay(); 
+
+    stopTimer();
+    isTimerDisabled = true;
+    updateTimerDisplay();
     
     movesQueue = []; 
     let numDiscos = parseInt(document.getElementById('numDiscos').value);

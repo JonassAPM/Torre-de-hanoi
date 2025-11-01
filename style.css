@@ -31,6 +31,7 @@ h1{
 }
 
 .controls{
+  position: relative;
   border-radius:6px;
   box-shadow: 0 2px 8px rgba(20, 20, 20, 0.233);
   border:1px solid rgba(255, 255, 255, 0);
@@ -192,14 +193,38 @@ button:disabled{opacity:1; cursor:not-allowed}
   font-size:12px;
 }
 
+.counters-wrapper {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.move-counter-min {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-right: 20px;
+}
+
+.move-counter-min span {
+  font-weight: bold;
+  color: var(--accent);
+  display: inline-block;
+  min-width: 25px;
+  text-align: left;
+  margin-left: 6px;
+}
+
 .move-counter {
-  position: fixed;
-  top: 15px;
-  right: 15px;
   background: var(--panel);
-  padding: 10px 16px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(20, 20, 20, 0.233);
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
@@ -211,6 +236,22 @@ button:disabled{opacity:1; cursor:not-allowed}
   color: var(--accent);
   display: inline-block;
   min-width: 25px;
+  text-align: left;
+  margin-left: 6px;
+}
+
+.timer {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-right: 5px;
+}
+
+.timer span {
+  font-weight: bold;
+  color: var(--accent);
+  display: inline-block;
+  min-width: 40px;
   text-align: left;
   margin-left: 6px;
 }
@@ -312,6 +353,22 @@ button:disabled{opacity:1; cursor:not-allowed}
 .modal-overlay.visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+.modal-stat {
+  font-size: 16px;
+  color: var(--muted, #333);
+  margin: 12px 0 0 0;
+  text-align: left;
+  display: inline-block;
+}
+
+.modal-stat span {
+  font-weight: bold;
+  color: var(--accent, #000);
+  display: inline-block;
+  margin-left: 8px;
+  min-width: 50px;
 }
 
 .modal-content {
