@@ -1,3 +1,60 @@
+class _StackNode {
+  constructor(value, next) {
+    this.value = value;
+    this.next = next;
+  }
+}
+
+class Stack {
+  constructor() {
+    this.top = null;
+    this.size = 0;
+  }
+
+  push(value) {
+    const newNode = new _StackNode(value, this.top);
+    this.top = newNode;
+    this.size++;
+  }
+
+  pop() {
+    if (this.isEmpty()) {
+      return undefined;
+    }
+    const value = this.top.value;
+    this.top = this.top.next;
+    this.size--;
+    return value;
+  }
+
+  peek() {
+    if (this.isEmpty()) {
+      return undefined;
+    }
+    return this.top.value;
+  }
+
+  isEmpty() {
+    return this.size === 0;
+  }
+
+  getLength() {
+    return this.size;
+  }
+
+  getValuesForRender() {
+    const values = [];
+    let current = this.top;
+
+    while (current) {
+      values.push(current.value);
+      current = current.next;
+    }
+
+    return values.reverse();
+  }
+}
+
 const numDiscosInput = document.getElementById('numDiscos');
 const colorControls = document.getElementById('colorControls');
 const generarBtn = document.getElementById('generarBtn');
@@ -23,7 +80,7 @@ const modalAceptarBtn = document.getElementById('modalAceptarBtn');
 
 let numDiscos = parseInt(numDiscosInput.value, 10) || 3;
 
-let pilas = [[], [], []];
+let pilas = [new Stack(), new Stack(), new Stack()];
 let colores = [];
 let dragSourceIndex = null;
 
@@ -33,6 +90,7 @@ let autoplayIndex = 0;
 let autoplayPaused = false;
 
 let moveCount = 0;
+let isGameWon = false;
 
 function crearControlesColor(n) {
   colorControls.innerHTML = '';
@@ -108,7 +166,8 @@ function coloresAleatorios(){
 }
 
 function inicializarPilas() {
-  pilas = [[], [], []];
+  clearAutoplay();
+  pilas = [new Stack(), new Stack(), new Stack()];
   for (let i = numDiscos; i >= 1; i--) {
     pilas[0].push(i);
   }
@@ -120,6 +179,7 @@ function inicializarPilas() {
 
   moveCount = 0;
   moveCountEl.textContent = moveCount;
+  isGameWon = false;
 
   if (boardEl) {
     boardEl.style.height = 'auto'; 
@@ -139,9 +199,9 @@ function inicializarPilas() {
 function renderPilas() {
   for (let p = 0; p < 3; p++) {
     stackEls[p].innerHTML = '';
-    const pila = pilas[p];
-    for (let i = 0; i < pila.length; i++) {
-      const size = pila[i];
+    const pilaArray = pilas[p].getValuesForRender();
+    for (let i = 0; i < pilaArray.length; i++) {
+      const size = pilaArray[i];
       const diskEl = document.createElement('div');
       diskEl.className = 'disk';
       diskEl.dataset.size = size;
@@ -154,7 +214,7 @@ function renderPilas() {
 
       diskEl.style.background = colores[size] || '#888';
 
-      const isTop = (i === pila.length - 1);
+      const isTop = (i === pilaArray.length - 1);
       if (isTop) {
         diskEl.style.cursor = 'grab';
         diskEl.draggable = true;
@@ -182,12 +242,24 @@ function renderPilas() {
   }
 }
 
-function intentarMover(fromIndex, toIndex) {
-  if (pilas[fromIndex].length === 0) {
+function intentarMover(fromIndex, toIndex, isUserMove = false) {
+  if (isUserMove && (autoplayTimer !== null || autoplayPaused)) {
+    if (autoplayTimer !== null) {
+        clearTimeout(autoplayTimer);
+        autoplayTimer = null; 
+    }
+    autoplayPaused = true;
+    moves = [];
+    autoplayIndex = 0;
+
+    updateControlButtons(); 
+  }
+  if (pilas[fromIndex].isEmpty()) { 
     return false;
   }
-  const disco = pilas[fromIndex][pilas[fromIndex].length - 1];
-  const destTop = pilas[toIndex][pilas[toIndex].length - 1];
+  const disco = pilas[fromIndex].peek(); 
+  const destTop = pilas[toIndex].peek(); 
+
   if (destTop !== undefined && destTop < disco) {
     return false;
   }
@@ -207,15 +279,16 @@ function intentarMover(fromIndex, toIndex) {
 stackEls.forEach((stackEl, pegIndex) => {
   const pegEl = stackEl.parentElement;
 
-  pegEl.addEventListener('dragover', (e) => {
+    pegEl.addEventListener('dragover', (e) => {
     e.preventDefault();
 
     if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
       return; 
     }
 
-    const disco = pilas[dragSourceIndex][pilas[dragSourceIndex].length - 1];
-    const destTop = pilas[pegIndex][pilas[pegIndex].length - 1];
+    // Usa .peek() para ver los discos
+    const disco = pilas[dragSourceIndex].peek();
+    const destTop = pilas[pegIndex].peek();
 
     if (destTop === undefined || destTop > disco) {
       pegEl.classList.add('drag-over');
@@ -239,7 +312,7 @@ stackEls.forEach((stackEl, pegIndex) => {
     if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
       return;
       }
-    intentarMover(dragSourceIndex, pegIndex);
+    intentarMover(dragSourceIndex, pegIndex, true);
     });
 });
 
@@ -251,16 +324,24 @@ function generarMovimientos(n, from, to, aux, outMoves) {
 }
 
 function updateControlButtons(isInitial = false) {
-  if (autoplayTimer !== null && !autoplayPaused) {
+  if (isGameWon) {
     solveBtn.disabled = true;
-    pauseBtn.disabled = false;
+    pauseBtn.disabled = true;
     resumeBtn.disabled = true;
     resetBtn.disabled = false;
-  } else if (autoplayTimer !== null && autoplayPaused) {
+
+  } else if (autoplayPaused) {
     solveBtn.disabled = true;
     pauseBtn.disabled = true;
     resumeBtn.disabled = false;
     resetBtn.disabled = false;
+
+  } else if (autoplayTimer !== null && !autoplayPaused) {
+    solveBtn.disabled = true;
+    pauseBtn.disabled = false;
+    resumeBtn.disabled = true;
+    resetBtn.disabled = false;
+
   } else {
     solveBtn.disabled = false;
     pauseBtn.disabled = true;
@@ -291,16 +372,17 @@ function runAutoplayStep() {
   const ms = parseInt(speedRange.value, 10);
   autoplayTimer = setTimeout(() => {
     const mv = moves[autoplayIndex];
-    intentarMover(mv.from, mv.to);
+    intentarMover(mv.from, mv.to, false);
     autoplayIndex++;
     if (!autoplayPaused) runAutoplayStep(); 
   }, ms);
 }
 
+let movesQueue = [];
+
 function pausarAutoplay() {
   if (autoplayTimer !== null) {
     clearTimeout(autoplayTimer);
-    autoplayTimer = null;
   }
   autoplayPaused = true;
   updateControlButtons();
@@ -325,7 +407,8 @@ function clearAutoplay() {
 }
 
 function comprobarVictoria() {
-  if ((pilas[1].length === numDiscos || pilas[2].length === numDiscos) && !modalVictoriaEl.classList.contains('visible')) {
+  if (!isGameWon && (pilas[1].getLength() === numDiscos || pilas[2].getLength() === numDiscos)) {
+    isGameWon = true;
     clearAutoplay();
     modalVictoriaEl.classList.add('visible');
   }
@@ -339,6 +422,35 @@ function updateSliderFill() {
   const percent = ((value - min) / (max - min)) * 100;
   
   speedRange.style.setProperty('--slider-fill-percent', `${percent}%`);
+}
+
+function findDisk(diskNum) {
+
+    for (let i = 0; i < pilas.length; i++) {
+        let valoresEnPila = pilas[i].getValuesForRender(); 
+
+        if (valoresEnPila.includes(diskNum)) {
+            return i;
+        }
+    }
+    
+    console.error(`Error: No se pudo encontrar el disco ${diskNum} en la variable 'pilas'`);
+    return -1;
+}
+
+function generarMovimientosDesdeEstado(n, targetPeg) {
+  if (n === 0) {
+    return;
+  }
+  let sourcePeg = findDisk(n);
+  if (sourcePeg === targetPeg) {
+    generarMovimientosDesdeEstado(n - 1, targetPeg);
+  } else {
+    let auxPeg = 3 - sourcePeg - targetPeg; 
+    generarMovimientosDesdeEstado(n - 1, auxPeg);
+    movesQueue.push({ from: sourcePeg, to: targetPeg });
+    generarMovimientos(n - 1, auxPeg, targetPeg, sourcePeg, movesQueue);
+    }
 }
 
 generarBtn.addEventListener('click', () => {
@@ -365,7 +477,20 @@ randomColorsBtn.addEventListener('click', () => {
 });
 
 solveBtn.addEventListener('click', () => {
-  iniciarAutoplay();
+    pausarAutoplay(); 
+    
+    movesQueue = [];
+    let numDiscos = parseInt(document.getElementById('numDiscos').value);
+    let targetPeg = 2;
+
+    generarMovimientosDesdeEstado(numDiscos, targetPeg); 
+
+    moves = movesQueue; 
+    autoplayIndex = 0;
+    autoplayPaused = false;
+
+    runAutoplayStep();
+    updateControlButtons();
 });
 
 pauseBtn.addEventListener('click', () => {
@@ -373,7 +498,20 @@ pauseBtn.addEventListener('click', () => {
 });
 
 resumeBtn.addEventListener('click', () => {
-  reanudarAutoplay();
+    pausarAutoplay(); 
+    
+    movesQueue = []; 
+    let numDiscos = parseInt(document.getElementById('numDiscos').value);
+    let targetPeg = 2; 
+
+    generarMovimientosDesdeEstado(numDiscos, targetPeg); 
+    
+    moves = movesQueue;
+    autoplayIndex = 0;
+    autoplayPaused = false;
+    
+    runAutoplayStep();
+    updateControlButtons();
 });
 
 resetBtn.addEventListener('click', () => {
