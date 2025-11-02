@@ -78,15 +78,29 @@ const moveCountEl = document.getElementById('moveCount');
 const minMoveCountEl = document.getElementById('minMoveCount');
 const timerEl = document.getElementById('timer');
 const modalVictoriaEl = document.getElementById('modalVictoria');
-const modalAceptarBtn = document.getElementById('modalAceptarBtn');
 const modalMoveCountEl = document.getElementById('modalMoveCount');
 const modalTimeEl = document.getElementById('modalTime');
+const modalTitle = document.getElementById('modalTitle');
+const modalAutoSolveMsg = document.getElementById('modalAutoSolveMsg');
+const modalStatsGroup = document.getElementById('modalStatsGroup');
+const modalInputGroup = document.getElementById('modalInputGroup');
+const modalPlayerName = document.getElementById('modalPlayerName');
+const modalGuardarBtn = document.getElementById('modalGuardarBtn');
+const modalOmitirBtn = document.getElementById('modalOmitirBtn');
+const recordsFilterSelect = document.getElementById('recordsDiskFilter');
+const sortMovesBtn = document.getElementById('sortMovesBtn');
+const sortTimeBtn = document.getElementById('sortTimeBtn');
+const recordsTbody = document.getElementById('recordsTbody');
+const SUPABASE_URL = 'https://mdmlmtwplbxegzzskipd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fcmn9c6VyyBryB-o6Mu7ow_RKglz96d';
+const supabase = window.supabase.createClient('https://mdmlmtwplbxegzzskipd.supabase.co', 'sb_publishable_fcmn9c6VyyBryB-o6Mu7ow_RKglz96d');
 
 let numDiscos = parseInt(numDiscosInput.value, 10) || 3;
 
 let pilas = [new Stack(), new Stack(), new Stack()];
 let colores = [];
 let dragSourceIndex = null;
+let selectedPegIndex = null;
 
 let moves = [];
 let autoplayTimer = null;
@@ -100,6 +114,10 @@ let timerInterval = null;
 let secondsElapsed = 0;
 let isTimerRunning = false;
 let isTimerDisabled = false;
+
+let hasSubmittedScore = false;
+let currentRecordFilter = numDiscos;
+let currentSortBy = 'moves';
 
 function crearControlesColor(n) {
   colorControls.innerHTML = '';
@@ -217,6 +235,12 @@ function inicializarPilas() {
   autoplayIndex = 0;
   autoplayPaused = false;
   dragSourceIndex = null;
+
+  if (selectedPegIndex !== null) {
+    stackEls[selectedPegIndex].parentElement.classList.remove('peg-selected');
+    selectedPegIndex = null;
+  }
+
   mensajeEl.textContent = '';
 
   moveCount = 0;
@@ -224,6 +248,12 @@ function inicializarPilas() {
   const minMoves = Math.pow(2, numDiscos) - 1;
   minMoveCountEl.textContent = minMoves;
   isGameWon = false;
+
+  hasSubmittedScore = false;
+  
+  stackEls.forEach(el => {
+    el.parentElement.style.pointerEvents = 'auto';
+  });
 
   resetTimer();
 
@@ -269,6 +299,10 @@ function renderPilas() {
             e.preventDefault();
             return;
           }
+          if (selectedPegIndex !== null) {
+            stackEls[selectedPegIndex].parentElement.classList.remove('peg-selected');
+            selectedPegIndex = null;
+          }
           dragSourceIndex = p;
           e.target.classList.add('dragging');
           e.dataTransfer.effectAllowed = 'move';
@@ -290,7 +324,6 @@ function renderPilas() {
 
 function intentarMover(fromIndex, toIndex, isUserMove = false) {
   if (isUserMove) {
-    // Si el usuario mueve, el juego es "legal" de nuevo
     isTimerDisabled = false;
     
     if (isUserMove && (autoplayTimer !== null || autoplayPaused)) {
@@ -336,26 +369,50 @@ stackEls.forEach((stackEl, pegIndex) => {
   const pegEl = stackEl.parentElement;
 
     pegEl.addEventListener('dragover', (e) => {
-    e.preventDefault();
+      e.preventDefault();
 
-    if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
-      return; 
-    }
+      if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
+        return; 
+      }
 
-    // Usa .peek() para ver los discos
-    const disco = pilas[dragSourceIndex].peek();
-    const destTop = pilas[pegIndex].peek();
+      // Usa .peek() para ver los discos
+      const disco = pilas[dragSourceIndex].peek();
+      const destTop = pilas[pegIndex].peek();
 
-    if (destTop === undefined || destTop > disco) {
-      pegEl.classList.add('drag-over');
-      pegEl.classList.remove('invalid-over');
-      e.dataTransfer.dropEffect = 'move';
-    } else {
-      pegEl.classList.add('invalid-over');
-      pegEl.classList.remove('drag-over');
-      e.dataTransfer.dropEffect = 'none';
-    }
-  });
+      if (destTop === undefined || destTop > disco) {
+        pegEl.classList.add('drag-over');
+        pegEl.classList.remove('invalid-over');
+        e.dataTransfer.dropEffect = 'move';
+      } else {
+        pegEl.classList.add('invalid-over');
+        pegEl.classList.remove('drag-over');
+        e.dataTransfer.dropEffect = 'none';
+      }
+    });
+
+    pegEl.addEventListener('click', () => {
+      if (isGameWon || (autoplayTimer !== null && !autoplayPaused)) {
+        return;
+      }
+
+      if (selectedPegIndex === null) {
+        if (pilas[pegIndex].isEmpty()) {
+          return;
+        }
+        selectedPegIndex = pegIndex;
+        pegEl.classList.add('peg-selected');
+      } 
+      else {
+        const fromIndex = selectedPegIndex;
+        const toIndex = pegIndex;
+        stackEls[fromIndex].parentElement.classList.remove('peg-selected');
+        selectedPegIndex = null;
+
+        if (fromIndex !== toIndex) {
+          intentarMover(fromIndex, toIndex, true);
+        }
+      }
+    });
 
   pegEl.addEventListener('dragleave', (e) => {
     pegEl.classList.remove('drag-over', 'invalid-over');
@@ -470,14 +527,35 @@ function comprobarVictoria() {
     clearAutoplay();
     stopTimer();
 
+    stackEls.forEach(el => {
+      el.parentElement.style.pointerEvents = 'none';
+    });
+
     modalMoveCountEl.textContent = moveCount;
+    const minutes = Math.floor(secondsElapsed / 60);
+    const seconds = secondsElapsed % 60;
+    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    modalTimeEl.textContent = timeString;
 
     if (isTimerDisabled) {
-      modalTimeEl.textContent = "--:-- (Solución Auto.)";
+      modalTitle.classList.add('hide');
+      modalAutoSolveMsg.classList.remove('hide');
+      modalInputGroup.classList.add('hide');
+      modalGuardarBtn.classList.add('hide');
+      
+      modalOmitirBtn.textContent = 'Aceptar';
+      modalStatsGroup.classList.remove('hide');
+      modalTimeEl.textContent = `${timeString} (Solución Auto.)`;
+
     } else {
-      const minutes = Math.floor(secondsElapsed / 60);
-      const seconds = secondsElapsed % 60;
-      modalTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      modalTitle.classList.remove('hide');
+      modalAutoSolveMsg.classList.add('hide');
+      modalInputGroup.classList.remove('hide');
+      modalGuardarBtn.classList.remove('hide');
+
+      modalOmitirBtn.textContent = 'Omitir';
+      modalPlayerName.value = '';
+      modalStatsGroup.classList.remove('hide');
     }
 
     modalVictoriaEl.classList.add('visible');
@@ -488,9 +566,7 @@ function updateSliderFill() {
   const value = parseInt(speedRange.value, 10);
   const min = parseInt(speedRange.min, 10);
   const max = parseInt(speedRange.max, 10);
-  
   const percent = ((value - min) / (max - min)) * 100;
-  
   speedRange.style.setProperty('--slider-fill-percent', `${percent}%`);
 }
 
@@ -523,7 +599,101 @@ function generarMovimientosDesdeEstado(n, targetPeg) {
     }
 }
 
-generarBtn.addEventListener('click', () => {
+async function saveRecord(newRecord) {
+  try {
+    const { data, error } = await supabase
+      .from('records')
+      .insert([newRecord]);
+    if (error) {
+      console.error('Error al guardar el récord:', error.message);
+      alert('Error al guardar el récord: ' + error.message);
+    }
+  } catch (err) {
+    console.error('Error inesperado al guardar:', err);
+  }
+}
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+async function renderRecords() {
+  recordsTbody.innerHTML = '<tr><td colspan="3">Cargando récords...</td></tr>';
+
+  let query = supabase
+    .from('records')
+    .select('*')
+    .eq('disks', currentRecordFilter)
+    .limit(10);
+
+  if (currentSortBy === 'moves') {
+    query = query.order('moves', { ascending: true }).order('time', { ascending: true });
+  } else {
+    query = query.order('time', { ascending: true }).order('moves', { ascending: true });
+  }
+
+  const { data: records, error } = await query;
+
+  if (error) {
+    console.error('Error al cargar récords:', error.message);
+    recordsTbody.innerHTML = `<tr><td colspan="3">Error al cargar récords.</td></tr>`;
+    return;
+  }
+
+  if (currentSortBy === 'moves') {
+    sortMovesBtn.classList.add('active');
+    sortTimeBtn.classList.remove('active');
+  } else {
+    sortMovesBtn.classList.remove('active');
+    sortTimeBtn.classList.add('active');
+  }
+
+  if (!records || records.length === 0) {
+    recordsTbody.innerHTML = `<tr><td colspan="3">No hay récords para esta cantidad de discos.</td></tr>`;
+    return;
+  }
+  
+  recordsTbody.innerHTML = ''; 
+  
+  records.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHTML(r.name)}</td>
+      <td>${r.moves}</td>
+      <td>${formatTime(r.time)}</td>
+    `;
+    recordsTbody.appendChild(tr);
+  });
+}
+
+function populateFilterSelect() {
+  recordsFilterSelect.innerHTML = '';
+  const min = 3;
+  const max = 10;
+  for (let i = min; i <= max; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = `${i} Discos`;
+    recordsFilterSelect.appendChild(option);
+  }
+  recordsFilterSelect.value = currentRecordFilter;
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, function(m) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    }[m];
+  });
+}
+
+generarBtn.addEventListener('click', async () => {
   const val = parseInt(numDiscosInput.value, 10);
   if (isNaN(val) || val < 3 || val > 10) {
     mensajeEl.textContent = '*Ingresa un número de discos entre 3 y 10.*';
@@ -532,6 +702,10 @@ generarBtn.addEventListener('click', () => {
   numDiscos = val;
   crearControlesColor(numDiscos);
   inicializarPilas();
+
+  currentRecordFilter = numDiscos;
+  recordsFilterSelect.value = numDiscos;
+  await renderRecords();
 });
 
 numDiscosInput.addEventListener('keydown', (e) => {
@@ -602,12 +776,55 @@ speedRange.addEventListener('input', () => {
   updateSliderFill();
 });
 
-modalAceptarBtn.addEventListener('click', () => {
+modalGuardarBtn.addEventListener('click', async () => {
+  if (hasSubmittedScore) return;
+  
+  const playerName = modalPlayerName.value.trim();
+
+  if (playerName) {
+    hasSubmittedScore = true;
+    
+    const record = {
+      name: playerName,
+      disks: numDiscos,
+      moves: moveCount,
+      time: secondsElapsed
+    };
+    saveRecord(record);
+  }
+
   modalVictoriaEl.classList.remove('visible');
+  await renderRecords();
 });
 
-window.addEventListener('load', () => {
+modalOmitirBtn.addEventListener('click', async () => {
+  modalVictoriaEl.classList.remove('visible');
+  await renderRecords();
+});
+
+recordsFilterSelect.addEventListener('change', async (e) => {
+  currentRecordFilter = parseInt(e.target.value, 10);
+  await renderRecords();
+});
+
+sortMovesBtn.addEventListener('click', async () => {
+  currentSortBy = 'moves';
+  await renderRecords();
+});
+
+sortTimeBtn.addEventListener('click', async () => {
+  currentSortBy = 'time';
+  await renderRecords();
+});
+
+
+window.addEventListener('load', async () => {
   crearControlesColor(numDiscos);
   inicializarPilas();
   updateSliderFill();
+  
+  populateFilterSelect();
+  currentRecordFilter = numDiscos;
+  recordsFilterSelect.value = numDiscos;
+  await renderRecords();
 });

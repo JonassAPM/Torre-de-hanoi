@@ -10,9 +10,8 @@
 <body>
 
   <main class="container">
-    <h1>Torres de Hanoi</h1>
-
     <section class="controls">
+      <h1>Torres de Hanoi</h1>
       <div class="counters-wrapper">
         <div id="minMoveCounterPanel" class="move-counter-min">
           Movimientos Mínimos: <span id="minMoveCount">0</span>
@@ -54,13 +53,13 @@
       </div>
 
       <p class="help">
-        Modo manual: haz clic en una pila para seleccionar el disco superior (se marca) y luego en la pila de destino para moverlo. 
+        Modo manual: <strong>Arrastra</strong> el disco superior de una pila y <strong>suéltalo</strong> en la pila de destino.
         No se permiten movimientos ilegales (disco mayor sobre menor).
       </p>
 
       <p id="mensaje" class="mensaje"></p>
     </section>
-
+    <h2></h2>
     <section id="tablero" class="board">
       <div class="peg" data-peg="0">
         <div class="peg-label">Pila A</div>
@@ -76,24 +75,74 @@
       </div>
     </section>
   </main>
+  <div>
+    <h1></h1>
+    <h2></h2>
+  </div>  
+  <div class="container">
+    <section class="controls">
+      <h2>Salón de la Fama</h2>
+      <h3>Top 10 puntajes</h3>
+      
+      <div class="records-controls">
+        <div class="filter-group"> 
+          <label for="recordsDiskFilter">Filtrar por discos:</label>
+          <select id="recordsDiskFilter"></select>
+        </div>
+        
+        <div class="sort-buttons">
+          <button id="sortMovesBtn" class="sort-button active">Ordenar por Movimientos</button>
+          <button id="sortTimeBtn" class="sort-button">Ordenar por Tiempo</button>
+        </div>
+      </div>
 
-  <div id="modalVictoria" class="modal-overlay">
+      <table id="recordsTable" class="records-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Movimientos</th>
+            <th>Tiempo</th>
+          </tr>
+        </thead>
+        <tbody id="recordsTbody">
+          </tbody>
+      </table>
+    </section>
+  </div>
+
+<div id="modalVictoria" class="modal-overlay">
     <div class="modal-content">
-      <h2>¡Felicidades!</h2>
-      <p>Juego terminado.</p>
-
-      <p class="modal-stat">
-        Movimientos: <span id="modalMoveCount">0</span>
-      </p>
-      <p class="modal-stat">
-        Tiempo: <span id="modalTime">00:00</span>
+      
+      <h2 id="modalTitle">¡Felicidades!</h2>
+      
+      <p id="modalAutoSolveMsg" class="hide">
+        ¡Solución completada! Los récords no se guardan en el modo automático.
       </p>
 
-      <button id="modalAceptarBtn">Aceptar</button>
+      <div id="modalStatsGroup">
+        <p class="modal-stat">
+          Movimientos: <span id="modalMoveCount">0</span>
+        </p>
+        <p class="modal-stat">
+          Tiempo: <span id="modalTime">00:00</span>
+        </p>
+      </div>
+
+      <div id="modalInputGroup" class="modal-input-group">
+        <label for="modalPlayerName">Ingrese Su Nombre:</label>
+        <input type="text" id="modalPlayerName" placeholder="Ingresa tu nombre">
+      </div>
+      
+      <div class="modal-buttons">
+        <button id="modalGuardarBtn">Guardar Puntaje</button>
+        <button id="modalOmitirBtn" class="button-secondary">Omitir</button>
+      </div>
+
     </div>
   </div>
 
-    <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
 
 </body>
 </html>
