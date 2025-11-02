@@ -190,7 +190,7 @@ button:disabled{opacity:1; cursor:not-allowed}
 .mensaje{
   margin-top:8px;
   font-size:14px;
-  color: rgb(0, 81, 255);
+  color: #007aff;
 }
 
 .credits{
@@ -440,20 +440,23 @@ button:disabled{opacity:1; cursor:not-allowed}
   background-size: 16px 16px;
 }
 
-.sort-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.sort-button {
+.sort-button,
+.limit-button {
   cursor: pointer;
-  background: #f0f0f0;
+  background: var(--panel);
+  color: var(--text);
 }
 
-.sort-button.active {
-  background: var(--accent, #007aff);
+.sort-button.active,
+.limit-button.active {
+  background: var(--accent);
   color: white;
   font-weight: 600;
+}
+
+.limit-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .records-table {
@@ -485,6 +488,12 @@ button:disabled{opacity:1; cursor:not-allowed}
 
 .records-table td {
   background: var(--panel);
+}
+
+.records-table th:first-child,
+.records-table td:first-child {
+  width: 60px;
+  text-align: center;
 }
 
 .records-table tbody tr:last-child td:first-child {
@@ -584,6 +593,11 @@ button:disabled{opacity:1; cursor:not-allowed}
     flex-direction: column;
     align-items: stretch;
   }
+
+  .limit-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 @media (max-width: 400px) {
@@ -636,4 +650,13 @@ button:disabled{opacity:1; cursor:not-allowed}
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
   }
+}
+
+.modal-error {
+  color: #007aff;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 0;
+  min-height: 1.2em; 
 }

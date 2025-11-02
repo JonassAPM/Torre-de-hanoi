@@ -86,11 +86,15 @@ const modalStatsGroup = document.getElementById('modalStatsGroup');
 const modalInputGroup = document.getElementById('modalInputGroup');
 const modalPlayerName = document.getElementById('modalPlayerName');
 const modalGuardarBtn = document.getElementById('modalGuardarBtn');
+const modalErrorMsg = document.getElementById('modalErrorMsg');
 const modalOmitirBtn = document.getElementById('modalOmitirBtn');
 const recordsFilterSelect = document.getElementById('recordsDiskFilter');
 const sortMovesBtn = document.getElementById('sortMovesBtn');
 const sortTimeBtn = document.getElementById('sortTimeBtn');
 const recordsTbody = document.getElementById('recordsTbody');
+const recordsTitle = document.getElementById('recordsTitle');
+const limit10Btn = document.getElementById('limit10Btn');
+const limit100Btn = document.getElementById('limit100Btn');
 const SUPABASE_URL = 'https://mdmlmtwplbxegzzskipd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fcmn9c6VyyBryB-o6Mu7ow_RKglz96d';
 const supabase = window.supabase.createClient('https://mdmlmtwplbxegzzskipd.supabase.co', 'sb_publishable_fcmn9c6VyyBryB-o6Mu7ow_RKglz96d');
@@ -111,13 +115,14 @@ let moveCount = 0;
 let isGameWon = false;
 
 let timerInterval = null;
-let secondsElapsed = 0;
+let millisecondsElapsed = 0;
 let isTimerRunning = false;
 let isTimerDisabled = false;
 
 let hasSubmittedScore = false;
 let currentRecordFilter = numDiscos;
 let currentSortBy = 'moves';
+let currentLimit = 10;
 
 function crearControlesColor(n) {
   colorControls.innerHTML = '';
@@ -154,21 +159,24 @@ function crearControlesColor(n) {
 
 function updateTimerDisplay() {
   if (isTimerDisabled) {
-    timerEl.textContent = "--:--";
+    timerEl.textContent = "--:--.---";
     return;
   }
-  const minutes = Math.floor(secondsElapsed / 60);
-  const seconds = secondsElapsed % 60;
-  timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+  timerEl.textContent = formatTime(millisecondsElapsed);
 }
 
 function startTimer() {
   if (isTimerRunning || isTimerDisabled) return;
   isTimerRunning = true;
+
+  let startTime = Date.now() - millisecondsElapsed; 
+
   timerInterval = setInterval(() => {
-    secondsElapsed++;
+
+    millisecondsElapsed = Date.now() - startTime;
     updateTimerDisplay();
-  }, 1000);
+  }, 10);
 }
 
 function stopTimer() {
@@ -179,7 +187,7 @@ function stopTimer() {
 
 function resetTimer() {
   stopTimer();
-  secondsElapsed = 0;
+  millisecondsElapsed = 0;
   isTimerRunning = false;
   isTimerDisabled = false;
   updateTimerDisplay();
@@ -349,7 +357,7 @@ function intentarMover(fromIndex, toIndex, isUserMove = false) {
     return false;
   }
 
-  if (isUserMove && !isTimerRunning && secondsElapsed === 0 && !isTimerDisabled) {
+  if (isUserMove && !isTimerRunning && millisecondsElapsed === 0 && !isTimerDisabled) {
       startTimer();
   }
 
@@ -521,7 +529,7 @@ function clearAutoplay() {
   updateControlButtons();
 }
 
-function comprobarVictoria() {
+async function comprobarVictoria() {
   if (!isGameWon && (pilas[1].getLength() === numDiscos || pilas[2].getLength() === numDiscos)) {
     isGameWon = true;
     clearAutoplay();
@@ -532,9 +540,7 @@ function comprobarVictoria() {
     });
 
     modalMoveCountEl.textContent = moveCount;
-    const minutes = Math.floor(secondsElapsed / 60);
-    const seconds = secondsElapsed % 60;
-    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    const timeString = formatTime(millisecondsElapsed); 
     modalTimeEl.textContent = timeString;
 
     if (isTimerDisabled) {
@@ -549,12 +555,14 @@ function comprobarVictoria() {
 
     } else {
       modalTitle.classList.remove('hide');
+      modalTitle.textContent = '¡Felicidades!';
       modalAutoSolveMsg.classList.add('hide');
       modalInputGroup.classList.remove('hide');
       modalGuardarBtn.classList.remove('hide');
 
       modalOmitirBtn.textContent = 'Omitir';
       modalPlayerName.value = '';
+      modalErrorMsg.textContent = '';
       modalStatsGroup.classList.remove('hide');
     }
 
@@ -613,20 +621,24 @@ async function saveRecord(newRecord) {
   }
 }
 
-function formatTime(totalSeconds) {
+function formatTime(totalMilliseconds) {
+  const totalSeconds = Math.floor(totalMilliseconds / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const milliseconds = totalMilliseconds % 1000; 
+  
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
 }
 
 async function renderRecords() {
-  recordsTbody.innerHTML = '<tr><td colspan="3">Cargando récords...</td></tr>';
+  recordsTitle.textContent = `Top ${currentLimit} puntajes`;
+  recordsTbody.innerHTML = '<tr><td colspan="4">Cargando récords...</td></tr>';
 
   let query = supabase
     .from('records')
     .select('*')
     .eq('disks', currentRecordFilter)
-    .limit(10);
+    .limit(currentLimit);
 
   if (currentSortBy === 'moves') {
     query = query.order('moves', { ascending: true }).order('time', { ascending: true });
@@ -638,7 +650,7 @@ async function renderRecords() {
 
   if (error) {
     console.error('Error al cargar récords:', error.message);
-    recordsTbody.innerHTML = `<tr><td colspan="3">Error al cargar récords.</td></tr>`;
+    recordsTbody.innerHTML = `<tr><td colspan="4">Error al cargar récords.</td></tr>`;
     return;
   }
 
@@ -650,16 +662,25 @@ async function renderRecords() {
     sortTimeBtn.classList.add('active');
   }
 
+  if (currentLimit === 10) {
+    limit10Btn.classList.add('active');
+    limit100Btn.classList.remove('active');
+  } else {
+    limit10Btn.classList.remove('active');
+    limit100Btn.classList.add('active');
+  }
+
   if (!records || records.length === 0) {
-    recordsTbody.innerHTML = `<tr><td colspan="3">No hay récords para esta cantidad de discos.</td></tr>`;
+    recordsTbody.innerHTML = `<tr><td colspan="4">No hay récords para esta cantidad de discos.</td></tr>`;
     return;
   }
   
   recordsTbody.innerHTML = ''; 
   
-  records.forEach(r => {
+  records.forEach((r, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
+      <td data-label="Pos.:">${index + 1}</td>
       <td data-label="Nombre:">${escapeHTML(r.name)}</td>
       <td data-label="Movimientos:">${r.moves}</td>
       <td data-label="Tiempo:">${formatTime(r.time)}</td>
@@ -778,21 +799,25 @@ speedRange.addEventListener('input', () => {
 
 modalGuardarBtn.addEventListener('click', async () => {
   if (hasSubmittedScore) return;
-  
-  const playerName = modalPlayerName.value.trim();
 
-  if (playerName) {
-    hasSubmittedScore = true;
-    
-    const record = {
-      name: playerName,
-      disks: numDiscos,
-      moves: moveCount,
-      time: secondsElapsed
-    };
-    saveRecord(record);
+  const playerName = modalPlayerName.value.trim();
+  modalErrorMsg.textContent = '';
+
+  if (playerName.length < 3 || playerName.length > 10) {
+     modalErrorMsg.textContent = 'El nombre debe tener entre 3 y 10 caracteres.';
+    return;
   }
 
+  hasSubmittedScore = true;
+
+  const record = {
+    name: playerName,
+    disks: numDiscos,
+    moves: moveCount,
+    time: millisecondsElapsed
+  };
+
+  await saveRecord(record);
   modalVictoriaEl.classList.remove('visible');
   await renderRecords();
 });
@@ -817,6 +842,20 @@ sortTimeBtn.addEventListener('click', async () => {
   await renderRecords();
 });
 
+sortTimeBtn.addEventListener('click', async () => {
+  currentSortBy = 'time';
+  await renderRecords();
+});
+
+limit10Btn.addEventListener('click', async () => {
+  currentLimit = 10;
+  await renderRecords();
+});
+
+limit100Btn.addEventListener('click', async () => {
+  currentLimit = 100;
+  await renderRecords();
+});
 
 window.addEventListener('load', async () => {
   crearControlesColor(numDiscos);
