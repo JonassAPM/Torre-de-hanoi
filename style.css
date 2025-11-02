@@ -449,7 +449,7 @@ button:disabled{opacity:1; cursor:not-allowed}
 
 .sort-button.active,
 .limit-button.active {
-  background: var(--accent);
+  background: #007aff;
   color: white;
   font-weight: 600;
 }
