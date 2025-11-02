@@ -213,7 +213,7 @@ button:disabled{opacity:1; cursor:not-allowed}
   font-size: 14px;
   font-weight: 500;
   color: var(--muted);
-  padding-right: 20px;
+  text-align: right;
 }
 
 .move-counter-min span {
@@ -221,7 +221,7 @@ button:disabled{opacity:1; cursor:not-allowed}
   color: var(--accent);
   display: inline-block;
   min-width: 25px;
-  text-align: left;
+  text-align: right;
   margin-left: 6px;
 }
 
@@ -229,7 +229,7 @@ button:disabled{opacity:1; cursor:not-allowed}
   background: var(--panel);
   padding-top: 5px;
   padding-bottom: 5px;
-  padding-right: 20px;
+  text-align: right;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -242,7 +242,7 @@ button:disabled{opacity:1; cursor:not-allowed}
   color: var(--accent);
   display: inline-block;
   min-width: 25px;
-  text-align: left;
+  text-align: right;
   margin-left: 6px;
 }
 
@@ -250,7 +250,7 @@ button:disabled{opacity:1; cursor:not-allowed}
   font-size: 14px;
   font-weight: 500;
   color: var(--muted);
-  padding-right: 5px;
+  text-align: right;
 }
 
 .timer span {
@@ -258,7 +258,7 @@ button:disabled{opacity:1; cursor:not-allowed}
   color: var(--accent);
   display: inline-block;
   min-width: 40px;
-  text-align: left;
+  text-align: right;
   margin-left: 6px;
 }
 
@@ -458,7 +458,6 @@ button:disabled{opacity:1; cursor:not-allowed}
 
 .records-table {
   width: 100%;
-  border-collapse: collapse;
   margin-top: 12px;
   border-radius: 10px;
   overflow: hidden;
@@ -553,4 +552,88 @@ button:disabled{opacity:1; cursor:not-allowed}
 .controls h3 {
   margin-top: 0;
   margin-bottom: 16px;
+}
+
+@media (max-width: 485px) {
+  .counters-wrapper {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .move-counter-min,
+  .move-counter,
+  .timer {
+    padding-right: 0;
+  }
+  .buttons-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .records-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+
+  .sort-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 400px) {
+
+  .records-table,
+  .records-table tbody,
+  .records-table tr,
+  .records-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .records-table {
+    border: none;
+  }
+
+  .records-table thead {
+    display: none;
+  }
+
+  .records-table tr {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .records-table td {
+    border: none;
+    padding: 8px 0;
+    text-align: left;
+    position: relative;
+    padding-left: 90px;
+  }
+
+  .records-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: 75px;
+    font-weight: bold;
+    color: var(--text);
+  }
+
+  .records-table tbody tr:last-child td:first-child,
+  .records-table tbody tr:last-child td:last-child {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+  }
 }

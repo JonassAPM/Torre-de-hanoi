@@ -660,9 +660,9 @@ async function renderRecords() {
   records.forEach(r => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${escapeHTML(r.name)}</td>
-      <td>${r.moves}</td>
-      <td>${formatTime(r.time)}</td>
+      <td data-label="Nombre:">${escapeHTML(r.name)}</td>
+      <td data-label="Movimientos:">${r.moves}</td>
+      <td data-label="Tiempo:">${formatTime(r.time)}</td>
     `;
     recordsTbody.appendChild(tr);
   });
