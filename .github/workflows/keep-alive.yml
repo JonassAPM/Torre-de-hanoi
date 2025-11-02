@@ -4,7 +4,7 @@ on:
   schedule:
     # Se ejecuta a la 1:00 AM cada 5 días.
     # (El formato cron es: minuto hora día(del mes) mes día(de la semana))
-    - cron: '0 1 */4 * *'
+    - cron: '0 1 */1 * *'
 
 jobs:
   ping:
