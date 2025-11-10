@@ -10,6 +10,7 @@
 <body>
 
   <main class="container">
+    <!-- PRIMERO: Controles -->
     <section class="controls">
       <h1>TORRES DE HANOI</h1>
       <label>by JONASS_APM</label>
@@ -37,10 +38,9 @@
         <button id="randomColorsBtn">Colores aleatorios</button>
       </div>
 
-      <hr/ >
-
       <div class="autoplay-controls">
         <label>
+          <h2></h2>
           Velocidad (ms por movimiento):
           <input id="speedRange" type="range" min="100" max="1500" value="500" />
           <span id="speedValue">500</span> ms
@@ -60,7 +60,11 @@
 
       <p id="mensaje" class="mensaje"></p>
     </section>
-    <h2></h2>
+
+    <div>
+      <h1></h1>
+    </div>
+
     <section id="tablero" class="board">
       <div class="peg" data-peg="0">
         <div class="peg-label">Pila A</div>
@@ -76,10 +80,11 @@
       </div>
     </section>
   </main>
-  <div>
-    <h1></h1>
-    <h2></h2>
-  </div>  
+
+    <div>
+      <h1></h1>
+    </div>
+
   <div class="container">
     <section class="controls">
       <h2>Salón de la Fama</h2>
@@ -111,12 +116,12 @@
           </tr>
         </thead>
         <tbody id="recordsTbody">
-          </tbody>
+        </tbody>
       </table>
     </section>
   </div>
 
-<div id="modalVictoria" class="modal-overlay">
+  <div id="modalVictoria" class="modal-overlay">
     <div class="modal-content">
       
       <h2 id="modalTitle">¡Felicidades!</h2>
