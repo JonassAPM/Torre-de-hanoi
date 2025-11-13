@@ -648,7 +648,32 @@ button:disabled{
     align-items: stretch;
   }
 
-  .sort-button.active{
+  /* Desactiva completamente las animaciones para los botones de ordenamiento */
+  .sort-button,
+  .limit-button,
+  .sort-button:hover,
+  .limit-button:hover,
+  .sort-button.active,
+  .limit-button.active,
+  .sort-button.active:hover,
+  .limit-button.active:hover,
+  .sort-button:active,
+  .limit-button:active,
+  .sort-button.active:active,
+  .limit-button.active:active {
+    transform: none !important;
+    box-shadow: var(--shadow) !important;
+    transition: none !important;
+  }
+
+  .sort-button.active,
+  .limit-button.active {
+    background: var(--accent) !important;
+    color: white !important;
+    border-color: var(--accent) !important;
+    margin-bottom: 8px;
+  }
+  .sort-button{
     margin-bottom: 8px;
   }
 
