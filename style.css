@@ -641,11 +641,15 @@ button:disabled{
   .move-counter-min,
   .move-counter,
   .timer {
-    padding-right: 0;
+    padding-right: 12px;
   }
   .buttons-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .sort-button.active{
+    margin-bottom: 8px;
   }
 
   .sort-buttons {
