@@ -647,11 +647,6 @@ button:disabled{
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .records-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
   .sort-buttons {
     flex-direction: column;
@@ -669,7 +664,7 @@ button:disabled{
   .records-table tbody,
   .records-table tr,
   .records-table td {
-    display: block;
+    display: -moz-box;
     width: 100%;
   }
 
@@ -687,8 +682,8 @@ button:disabled{
     border-radius: 10px;
     background: var(--panel);
     display: flex;
+    text-align: left;
     flex-direction: column;
-    padding: 10px;
   }
 
   .records-table td {
@@ -696,13 +691,14 @@ button:disabled{
     padding: 8px 0;
     text-align: left;
     position: relative;
-    padding-left: 90px;
+    padding-left: 120px;
   }
 
   .records-table td::before {
     content: attr(data-label);
     position: absolute;
     left: 10px;
+    padding-right: 100px;
     width: 75px;
     font-weight: bold;
     color: var(--text);
