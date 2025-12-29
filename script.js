@@ -867,3 +867,4 @@ window.addEventListener('load', async () => {
   recordsFilterSelect.value = numDiscos;
   await renderRecords();
 });
+
