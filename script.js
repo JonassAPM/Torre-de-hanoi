@@ -72,7 +72,7 @@ const resumeBtn = document.getElementById('resumeBtn');
 const resetBtn = document.getElementById('resetBtn');
 const speedRange = document.getElementById('speedRange');
 const speedValue = document.getElementById('speedValue');
-const boardEl = document.getElementById('tablero'); ;
+const boardEl = document.getElementById('tablero');;
 const mensajeEl = document.getElementById('mensaje');
 const moveCountEl = document.getElementById('moveCount');
 const minMoveCountEl = document.getElementById('minMoveCount');
@@ -95,9 +95,6 @@ const recordsTbody = document.getElementById('recordsTbody');
 const recordsTitle = document.getElementById('recordsTitle');
 const limit10Btn = document.getElementById('limit10Btn');
 const limit100Btn = document.getElementById('limit100Btn');
-const SUPABASE_URL = 'https://mdmlmtwplbxegzzskipd.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_fcmn9c6VyyBryB-o6Mu7ow_RKglz96d';
-const supabase = window.supabase.createClient('https://mdmlmtwplbxegzzskipd.supabase.co', 'sb_publishable_fcmn9c6VyyBryB-o6Mu7ow_RKglz96d');
 
 let numDiscos = parseInt(numDiscosInput.value, 10) || 3;
 
@@ -170,7 +167,7 @@ function startTimer() {
   if (isTimerRunning || isTimerDisabled) return;
   isTimerRunning = true;
 
-  let startTime = Date.now() - millisecondsElapsed; 
+  let startTime = Date.now() - millisecondsElapsed;
 
   timerInterval = setInterval(() => {
 
@@ -204,9 +201,9 @@ function hslToHex(h, s, l) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-function coloresAleatorios(){
+function coloresAleatorios() {
   const h_start = Math.floor(Math.random() * 360);
-  const h_shift_amount = 90 + Math.random() * 60; 
+  const h_shift_amount = 90 + Math.random() * 60;
   const h_shift_direction = (Math.random() > 0.5 ? 1 : -1);
   const h_shift = h_shift_amount * h_shift_direction;
 
@@ -221,13 +218,13 @@ function coloresAleatorios(){
       current_h += 360;
     }
 
-    const randomHex = hslToHex(current_h, s, l); 
+    const randomHex = hslToHex(current_h, s, l);
     colores[i] = randomHex;
   }
   const colorInputs = colorControls.querySelectorAll('input[type="color"]');
-  colorInputs.forEach((input, idx)=> {
-    if (colores[idx+1]) {
-      input.value = colores[idx+1];
+  colorInputs.forEach((input, idx) => {
+    if (colores[idx + 1]) {
+      input.value = colores[idx + 1];
     }
   });
   renderPilas();
@@ -258,7 +255,7 @@ function inicializarPilas() {
   isGameWon = false;
 
   hasSubmittedScore = false;
-  
+
   stackEls.forEach(el => {
     el.parentElement.style.pointerEvents = 'auto';
   });
@@ -266,7 +263,7 @@ function inicializarPilas() {
   resetTimer();
 
   if (boardEl) {
-    boardEl.style.height = 'auto'; 
+    boardEl.style.height = 'auto';
   }
 
   updateControlButtons(true);
@@ -333,32 +330,32 @@ function renderPilas() {
 function intentarMover(fromIndex, toIndex, isUserMove = false) {
   if (isUserMove) {
     isTimerDisabled = false;
-    
+
     if (isUserMove && (autoplayTimer !== null || autoplayPaused)) {
       if (autoplayTimer !== null) {
         clearTimeout(autoplayTimer);
-        autoplayTimer = null; 
+        autoplayTimer = null;
       }
-    autoplayPaused = true;
-    moves = [];
-    autoplayIndex = 0;
+      autoplayPaused = true;
+      moves = [];
+      autoplayIndex = 0;
 
-    updateControlButtons(); 
+      updateControlButtons();
     }
   }
 
-  if (pilas[fromIndex].isEmpty()) { 
+  if (pilas[fromIndex].isEmpty()) {
     return false;
   }
-  const disco = pilas[fromIndex].peek(); 
-  const destTop = pilas[toIndex].peek(); 
+  const disco = pilas[fromIndex].peek();
+  const destTop = pilas[toIndex].peek();
 
   if (destTop !== undefined && destTop < disco) {
     return false;
   }
 
   if (isUserMove && !isTimerRunning && millisecondsElapsed === 0 && !isTimerDisabled) {
-      startTimer();
+    startTimer();
   }
 
   pilas[fromIndex].pop();
@@ -376,51 +373,51 @@ function intentarMover(fromIndex, toIndex, isUserMove = false) {
 stackEls.forEach((stackEl, pegIndex) => {
   const pegEl = stackEl.parentElement;
 
-    pegEl.addEventListener('dragover', (e) => {
-      e.preventDefault();
+  pegEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
 
-      if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
-        return; 
-      }
+    if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
+      return;
+    }
 
-      // Usa .peek() para ver los discos
-      const disco = pilas[dragSourceIndex].peek();
-      const destTop = pilas[pegIndex].peek();
+    // Usa .peek() para ver los discos
+    const disco = pilas[dragSourceIndex].peek();
+    const destTop = pilas[pegIndex].peek();
 
-      if (destTop === undefined || destTop > disco) {
-        pegEl.classList.add('drag-over');
-        pegEl.classList.remove('invalid-over');
-        e.dataTransfer.dropEffect = 'move';
-      } else {
-        pegEl.classList.add('invalid-over');
-        pegEl.classList.remove('drag-over');
-        e.dataTransfer.dropEffect = 'none';
-      }
-    });
+    if (destTop === undefined || destTop > disco) {
+      pegEl.classList.add('drag-over');
+      pegEl.classList.remove('invalid-over');
+      e.dataTransfer.dropEffect = 'move';
+    } else {
+      pegEl.classList.add('invalid-over');
+      pegEl.classList.remove('drag-over');
+      e.dataTransfer.dropEffect = 'none';
+    }
+  });
 
-    pegEl.addEventListener('click', () => {
-      if (isGameWon || (autoplayTimer !== null && !autoplayPaused)) {
+  pegEl.addEventListener('click', () => {
+    if (isGameWon || (autoplayTimer !== null && !autoplayPaused)) {
+      return;
+    }
+
+    if (selectedPegIndex === null) {
+      if (pilas[pegIndex].isEmpty()) {
         return;
       }
+      selectedPegIndex = pegIndex;
+      pegEl.classList.add('peg-selected');
+    }
+    else {
+      const fromIndex = selectedPegIndex;
+      const toIndex = pegIndex;
+      stackEls[fromIndex].parentElement.classList.remove('peg-selected');
+      selectedPegIndex = null;
 
-      if (selectedPegIndex === null) {
-        if (pilas[pegIndex].isEmpty()) {
-          return;
-        }
-        selectedPegIndex = pegIndex;
-        pegEl.classList.add('peg-selected');
-      } 
-      else {
-        const fromIndex = selectedPegIndex;
-        const toIndex = pegIndex;
-        stackEls[fromIndex].parentElement.classList.remove('peg-selected');
-        selectedPegIndex = null;
-
-        if (fromIndex !== toIndex) {
-          intentarMover(fromIndex, toIndex, true);
-        }
+      if (fromIndex !== toIndex) {
+        intentarMover(fromIndex, toIndex, true);
       }
-    });
+    }
+  });
 
   pegEl.addEventListener('dragleave', (e) => {
     pegEl.classList.remove('drag-over', 'invalid-over');
@@ -432,9 +429,9 @@ stackEls.forEach((stackEl, pegIndex) => {
 
     if (dragSourceIndex === null || dragSourceIndex === pegIndex) {
       return;
-      }
+    }
     intentarMover(dragSourceIndex, pegIndex, true);
-    });
+  });
 });
 
 function generarMovimientos(n, from, to, aux, outMoves) {
@@ -495,7 +492,7 @@ function runAutoplayStep() {
     const mv = moves[autoplayIndex];
     intentarMover(mv.from, mv.to, false);
     autoplayIndex++;
-    if (!autoplayPaused) runAutoplayStep(); 
+    if (!autoplayPaused) runAutoplayStep();
   }, ms);
 }
 
@@ -540,7 +537,7 @@ async function comprobarVictoria() {
     });
 
     modalMoveCountEl.textContent = moveCount;
-    const timeString = formatTime(millisecondsElapsed); 
+    const timeString = formatTime(millisecondsElapsed);
     modalTimeEl.textContent = timeString;
 
     if (isTimerDisabled) {
@@ -548,7 +545,7 @@ async function comprobarVictoria() {
       modalAutoSolveMsg.classList.remove('hide');
       modalInputGroup.classList.add('hide');
       modalGuardarBtn.classList.add('hide');
-      
+
       modalOmitirBtn.textContent = 'Aceptar';
       modalStatsGroup.classList.remove('hide');
       modalTimeEl.textContent = `${timeString} (Solución Auto.)`;
@@ -580,16 +577,16 @@ function updateSliderFill() {
 
 function findDisk(diskNum) {
 
-    for (let i = 0; i < pilas.length; i++) {
-        let valoresEnPila = pilas[i].getValuesForRender(); 
+  for (let i = 0; i < pilas.length; i++) {
+    let valoresEnPila = pilas[i].getValuesForRender();
 
-        if (valoresEnPila.includes(diskNum)) {
-            return i;
-        }
+    if (valoresEnPila.includes(diskNum)) {
+      return i;
     }
-    
-    console.error(`Error: No se pudo encontrar el disco ${diskNum} en la variable 'pilas'`);
-    return -1;
+  }
+
+  console.error(`Error: No se pudo encontrar el disco ${diskNum} en la variable 'pilas'`);
+  return -1;
 }
 
 function generarMovimientosDesdeEstado(n, targetPeg) {
@@ -600,22 +597,20 @@ function generarMovimientosDesdeEstado(n, targetPeg) {
   if (sourcePeg === targetPeg) {
     generarMovimientosDesdeEstado(n - 1, targetPeg);
   } else {
-    let auxPeg = 3 - sourcePeg - targetPeg; 
+    let auxPeg = 3 - sourcePeg - targetPeg;
     generarMovimientosDesdeEstado(n - 1, auxPeg);
     movesQueue.push({ from: sourcePeg, to: targetPeg });
     generarMovimientos(n - 1, auxPeg, targetPeg, sourcePeg, movesQueue);
-    }
+  }
 }
 
 async function saveRecord(newRecord) {
   try {
-    const { data, error } = await supabase
-      .from('records')
-      .insert([newRecord]);
-    if (error) {
-      console.error('Error al guardar el récord:', error.message);
-      alert('Error al guardar el récord: ' + error.message);
-    }
+    let records = JSON.parse(localStorage.getItem('hanoi_records')) || [];
+
+    records.push(newRecord);
+
+    localStorage.setItem('hanoi_records', JSON.stringify(records));
   } catch (err) {
     console.error('Error inesperado al guardar:', err);
   }
@@ -625,8 +620,8 @@ function formatTime(totalMilliseconds) {
   const totalSeconds = Math.floor(totalMilliseconds / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const milliseconds = totalMilliseconds % 1000; 
-  
+  const milliseconds = totalMilliseconds % 1000;
+
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
 }
 
@@ -634,25 +629,21 @@ async function renderRecords() {
   recordsTitle.textContent = `Top ${currentLimit} puntajes`;
   recordsTbody.innerHTML = '<tr><td colspan="4">Cargando récords...</td></tr>';
 
-  let query = supabase
-    .from('records')
-    .select('*')
-    .eq('disks', currentRecordFilter)
-    .limit(currentLimit);
+  let allRecords = JSON.parse(localStorage.getItem('hanoi_records')) || [];
 
-  if (currentSortBy === 'moves') {
-    query = query.order('moves', { ascending: true }).order('time', { ascending: true });
-  } else {
-    query = query.order('time', { ascending: true }).order('moves', { ascending: true });
-  }
+  let filteredRecords = allRecords.filter(r => r.disks === currentRecordFilter);
 
-  const { data: records, error } = await query;
+  filteredRecords.sort((a, b) => {
+    if (currentSortBy === 'moves') {
+      if (a.moves === b.moves) return a.time - b.time;
+      return a.moves - b.moves;
+    } else {
+      if (a.time === b.time) return a.moves - b.moves;
+      return a.time - b.time;
+    }
+  });
 
-  if (error) {
-    console.error('Error al cargar récords:', error.message);
-    recordsTbody.innerHTML = `<tr><td colspan="4">Error al cargar récords.</td></tr>`;
-    return;
-  }
+  let limitedRecords = filteredRecords.slice(0, currentLimit);
 
   if (currentSortBy === 'moves') {
     sortMovesBtn.classList.add('active');
@@ -670,14 +661,14 @@ async function renderRecords() {
     limit100Btn.classList.add('active');
   }
 
-  if (!records || records.length === 0) {
+  if (!limitedRecords || limitedRecords.length === 0) {
     recordsTbody.innerHTML = `<tr><td colspan="4">No hay récords para esta cantidad de discos.</td></tr>`;
     return;
   }
-  
-  recordsTbody.innerHTML = ''; 
-  
-  records.forEach((r, index) => {
+
+  recordsTbody.innerHTML = '';
+
+  limitedRecords.forEach((r, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td data-label="Pos.:">${index + 1}</td>
@@ -703,7 +694,7 @@ function populateFilterSelect() {
 }
 
 function escapeHTML(str) {
-  return str.replace(/[&<>"']/g, function(m) {
+  return str.replace(/[&<>"']/g, function (m) {
     return {
       '&': '&amp;',
       '<': '&lt;',
@@ -732,8 +723,8 @@ generarBtn.addEventListener('click', async () => {
 numDiscosInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
 
-    e.preventDefault(); 
-    generarBtn.click(); 
+    e.preventDefault();
+    generarBtn.click();
   }
 });
 
@@ -742,24 +733,24 @@ randomColorsBtn.addEventListener('click', () => {
 });
 
 solveBtn.addEventListener('click', () => {
-    pausarAutoplay(); 
-    
-    stopTimer();
-    isTimerDisabled = true;
-    updateTimerDisplay();
+  pausarAutoplay();
 
-    movesQueue = [];
-    let numDiscos = parseInt(document.getElementById('numDiscos').value);
-    let targetPeg = 2;
+  stopTimer();
+  isTimerDisabled = true;
+  updateTimerDisplay();
 
-    generarMovimientosDesdeEstado(numDiscos, targetPeg); 
+  movesQueue = [];
+  let numDiscos = parseInt(document.getElementById('numDiscos').value);
+  let targetPeg = 2;
 
-    moves = movesQueue; 
-    autoplayIndex = 0;
-    autoplayPaused = false;
+  generarMovimientosDesdeEstado(numDiscos, targetPeg);
 
-    runAutoplayStep();
-    updateControlButtons();
+  moves = movesQueue;
+  autoplayIndex = 0;
+  autoplayPaused = false;
+
+  runAutoplayStep();
+  updateControlButtons();
 });
 
 pauseBtn.addEventListener('click', () => {
@@ -767,24 +758,24 @@ pauseBtn.addEventListener('click', () => {
 });
 
 resumeBtn.addEventListener('click', () => {
-    pausarAutoplay(); 
+  pausarAutoplay();
 
-    stopTimer();
-    isTimerDisabled = true;
-    updateTimerDisplay();
-    
-    movesQueue = []; 
-    let numDiscos = parseInt(document.getElementById('numDiscos').value);
-    let targetPeg = 2; 
+  stopTimer();
+  isTimerDisabled = true;
+  updateTimerDisplay();
 
-    generarMovimientosDesdeEstado(numDiscos, targetPeg); 
-    
-    moves = movesQueue;
-    autoplayIndex = 0;
-    autoplayPaused = false;
-    
-    runAutoplayStep();
-    updateControlButtons();
+  movesQueue = [];
+  let numDiscos = parseInt(document.getElementById('numDiscos').value);
+  let targetPeg = 2;
+
+  generarMovimientosDesdeEstado(numDiscos, targetPeg);
+
+  moves = movesQueue;
+  autoplayIndex = 0;
+  autoplayPaused = false;
+
+  runAutoplayStep();
+  updateControlButtons();
 });
 
 resetBtn.addEventListener('click', () => {
@@ -804,7 +795,7 @@ modalGuardarBtn.addEventListener('click', async () => {
   modalErrorMsg.textContent = '';
 
   if (playerName.length < 3 || playerName.length > 10) {
-     modalErrorMsg.textContent = 'El nombre debe tener entre 3 y 10 caracteres.';
+    modalErrorMsg.textContent = 'El nombre debe tener entre 3 y 10 caracteres.';
     return;
   }
 
@@ -861,7 +852,7 @@ window.addEventListener('load', async () => {
   crearControlesColor(numDiscos);
   inicializarPilas();
   updateSliderFill();
-  
+
   populateFilterSelect();
   currentRecordFilter = numDiscos;
   recordsFilterSelect.value = numDiscos;

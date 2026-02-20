@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="stack_icon_151083.png" />
 </head>
+
 <body>
 
   <main class="container">
@@ -54,7 +56,8 @@
       </div>
 
       <p class="help">
-        Modo manual: <strong>Arrastra</strong> el disco superior de una pila y <strong>suéltalo</strong> en la pila de destino.
+        Modo manual: <strong>Arrastra</strong> el disco superior de una pila y <strong>suéltalo</strong> en la pila de
+        destino.
         No se permiten movimientos ilegales (disco mayor sobre menor).
       </p>
 
@@ -81,21 +84,21 @@
     </section>
   </main>
 
-    <div>
-      <h1></h1>
-    </div>
+  <div>
+    <h1></h1>
+  </div>
 
   <div class="container">
     <section class="controls">
       <h2>Salón de la Fama</h2>
       <h3 id="recordsTitle">Top 10 puntajes</h3>
-      
+
       <div class="records-controls">
-        <div class="filter-group"> 
+        <div class="filter-group">
           <label for="recordsDiskFilter">Filtrar por discos:</label>
           <select id="recordsDiskFilter"></select>
         </div>
-        
+
         <div class="sort-buttons">
           <button id="sortMovesBtn" class="sort-button active">Ordenar por Movimientos</button>
           <button id="sortTimeBtn" class="sort-button">Ordenar por Tiempo</button>
@@ -123,9 +126,9 @@
 
   <div id="modalVictoria" class="modal-overlay">
     <div class="modal-content">
-      
+
       <h2 id="modalTitle">¡Felicidades!</h2>
-      
+
       <p id="modalAutoSolveMsg" class="hide">
         ¡Solución completada! Los récords no se guardan en el modo automático.
       </p>
@@ -144,7 +147,7 @@
         <input type="text" id="modalPlayerName" placeholder="Ingresa tu nombre">
         <p id="modalErrorMsg" class="modal-error"></p>
       </div>
-      
+
       <div class="modal-buttons">
         <button id="modalGuardarBtn">Guardar Puntaje</button>
         <button id="modalOmitirBtn" class="button-secondary">Omitir</button>
@@ -153,8 +156,8 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 
 </body>
+
 </html>
